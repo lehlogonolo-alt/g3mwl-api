@@ -7,7 +7,7 @@ const app = express();
 
 // 🌍 Middleware
 app.use(cors());
-app.use(express.json()); // Parses JSON body
+app.use(express.json()); // Parse JSON bodies
 
 // 🧭 Route Imports
 const authRoutes = require('./routes/auth');
@@ -15,18 +15,26 @@ const patientRoutes = require('./routes/patients');
 const sideEffectRoutes = require('./routes/sideEffects');
 const dashboardRoutes = require('./routes/dashboard');
 const activityRoutes = require('./routes/activity');
-const visitRoutes = require('./routes/visits');       // ✅ Site Visit analytics
-const reportRoutes = require('./routes/reports');     // ✅ Weekly Reports
+const visitRoutes = require('./routes/visits');   // Site Visit analytics
+const reportRoutes = require('./routes/reports'); // Weekly Reports
 
-// 🧪 Health Check
+// 🧪 DB Connection
 const { poolPromise } = require('./config/db');
+
+// 🏠 Root Route
+app.get('/', (req, res) => {
+  res.json({ message: 'G3MWL API is running' });
+});
+
+// 🔍 Health Check
 app.get('/api/ping', async (req, res) => {
   try {
     const pool = await poolPromise;
     const result = await pool.request().query('SELECT 1 AS ping');
     res.json({ message: 'G3MWL backend is alive!', ping: result.recordset[0].ping });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('❌ Health Check Error:', err);
+    res.status(500).json({ error: 'Health check failed', details: err.message });
   }
 });
 
@@ -37,7 +45,7 @@ app.use('/api/side-effects', sideEffectRoutes); // Side Effects
 app.use('/api/dashboard', dashboardRoutes);     // Dashboard
 app.use('/api/activity', activityRoutes);       // Activity logging
 app.use('/api/site-visits', visitRoutes);       // Site Visit analytics
-app.use('/api/reports', reportRoutes);          // ✅ Weekly Reports
+app.use('/api/reports', reportRoutes);          // Weekly Reports
 
 // 🛑 404 Handler
 app.use((req, res) => {
@@ -53,7 +61,7 @@ app.use((err, req, res, next) => {
 // 🚀 Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
   console.log('✅ Connected to SQL Server');
 });
 
