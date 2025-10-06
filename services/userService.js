@@ -10,7 +10,7 @@ async function createUser(email, password) {
             .input('Email', email)
             .input('Password', hashed)
             .query(`
-                INSERT INTO Users (Email, Password)
+                INSERT INTO dbo.Users (Email, Password)
                 VALUES (@Email, @Password)
             `);
 
@@ -28,11 +28,12 @@ async function findUserByEmail(email) {
     const pool = await poolPromise;
     const result = await pool.request()
         .input('Email', email)
-        .query(`SELECT * FROM Users WHERE Email = @Email`);
+        .query(`SELECT * FROM dbo.Users WHERE Email = @Email`);
 
     return result.recordset[0] || null;
 }
 
 module.exports = { createUser, findUserByEmail };
+
 
 
